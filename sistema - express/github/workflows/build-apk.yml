@@ -1,1 +1,157 @@
 
+name: Gerar APK - Sistema Express
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  build-apk:
+    name: Compilar APK Android
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Baixar código do repositório
+        uses: actions/checkout@v4
+
+      - name: Exibir estrutura inicial do projeto
+        run: |
+          echo "📁 Estrutura do projeto:"
+          ls -la
+          echo ""
+          echo "📁 Workflows:"
+          ls -la .github/workflows || true
+
+      - name: Configurar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Instalar dependências do sistema
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            git \
+            zip \
+            unzip \
+            openjdk-17-jdk \
+            python3-pip \
+            python3-setuptools \
+            python3-wheel \
+            autoconf \
+            libtool \
+            pkg-config \
+            zlib1g-dev \
+            libncurses5-dev \
+            libncursesw5-dev \
+            libtinfo5 \
+            cmake \
+            libffi-dev \
+            libssl-dev \
+            build-essential \
+            ccache \
+            libsqlite3-dev \
+            sqlite3 \
+            poppler-utils
+
+      - name: Atualizar ferramentas Python
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install --upgrade cython virtualenv buildozer
+
+      - name: Validar arquivos obrigatórios
+        run: |
+          echo "🔎 Verificando arquivos principais..."
+
+          if [ ! -f "main.py" ]; then
+            echo "❌ ERRO: main.py não encontrado na raiz do projeto."
+            echo "O APK precisa de um arquivo main.py na raiz."
+            exit 1
+          fi
+
+          if [ ! -f "buildozer.spec" ]; then
+            echo "❌ ERRO: buildozer.spec não encontrado na raiz do projeto."
+            exit 1
+          fi
+
+          if [ ! -d "sistema - express" ]; then
+            echo "❌ ERRO: pasta 'sistema - express' não encontrada."
+            exit 1
+          fi
+
+          if [ ! -f "sistema - express/iniciar.py" ]; then
+            echo "❌ ERRO: sistema - express/iniciar.py não encontrado."
+            exit 1
+          fi
+
+          echo "✅ Arquivos obrigatórios encontrados."
+
+      - name: Preparar permissões e pastas
+        run: |
+          chmod +x main.py || true
+          chmod +x "sistema - express/iniciar.py" || true
+          mkdir -p bin
+          mkdir -p .buildozer
+
+      - name: Testar compilação Python do sistema
+        run: |
+          echo "🐍 Testando compilação dos arquivos Python..."
+          python -m compileall . -q
+          echo "✅ Compilação Python concluída sem erros."
+
+      - name: Mostrar buildozer.spec
+        run: |
+          echo "📄 Conteúdo do buildozer.spec:"
+          cat buildozer.spec
+
+      - name: Cache Buildozer
+        uses: actions/cache@v4
+        with:
+          path: |
+            .buildozer
+            ~/.buildozer
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: buildozer-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
+          restore-keys: |
+            buildozer-${{ runner.os }}-
+
+      - name: Compilar APK com Buildozer
+        run: |
+          echo "🚀 Iniciando compilação do APK..."
+          buildozer android debug
+
+      - name: Verificar APK gerado
+        run: |
+          echo "📦 Arquivos gerados em bin/:"
+          ls -lah bin || true
+
+          APK_FILE=$(find bin -name "*.apk" | head -n 1)
+
+          if [ -z "$APK_FILE" ]; then
+            echo "❌ ERRO: Nenhum APK foi gerado."
+            exit 1
+          fi
+
+          echo "✅ APK gerado com sucesso:"
+          echo "$APK_FILE"
+
+      - name: Enviar APK como artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Sistema-Express-APK
+          path: bin/*.apk
+          if-no-files-found: error
+          retention-days: 30
