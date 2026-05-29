@@ -1,0 +1,10 @@
+SISTEMA EXCLUSIVO - EXPRESS RESTAURANTES - UNIDADE COLORADO
+
+Este pacote foi preparado para APK pelo GitHub Actions.
+
+No Android, a tela abre como um console operacional.
+Use os mesmos números do sistema:
+- 999 para voltar/cancelar
+- ENTER para continuar
+
+Os arquivos do sistema ficam preservados dentro do aplicativo.

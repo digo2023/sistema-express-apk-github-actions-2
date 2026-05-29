@@ -1,0 +1,19 @@
+SISTEMA EXCLUSIVO - EXPRESS RESTAURANTES - UNIDADE COLORADO
+REVISÃO TÉCNICA FINAL
+
+Atualização consolidada com:
+- Cadastro automático de produtos por arquivo Tekinisa.
+- Seleção de arquivos por pasta de importação.
+- Retorno/cancelamento com 999.
+- Relatórios de estoque completo e estoque com saldo.
+- Produtos ordenados alfabeticamente nos relatórios/cadastros.
+- Campo código de barras/EAN no cadastro de produtos.
+- Entrada por código, saída por código, conferência por código, consulta e vínculo.
+- Backup completo, diário e mensal, sem limite artificial de dados.
+- Compatibilidade com bancos e backups anteriores por migração automática.
+- Relatórios mantendo dd/mm/aaaa - hora:minutos -By Maicon.
+
+Observação operacional:
+A leitura por código funciona com código digitado, colado, leitor Bluetooth/USB ou aplicativo scanner que envie o código para o campo do Termux. O Termux puro não abre o seletor visual nativo da câmera como um APK Android comum.
+
+Revisado com compilação Python e testes de banco, planejamento, compra, estoque e código de barras.
